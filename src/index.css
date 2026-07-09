@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   PublicEye NG — global base layer
+   Design tokens live in tailwind.config.js. Keep raw values out of components.
+--------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    --ring: 29 78 216; /* civic blue, used for focus rings */
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings use the civic display serif */
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+  }
+
+  /* Always-visible, accessible focus states (Master PRD §15) */
+  :focus-visible {
+    @apply outline-none ring-2 ring-civic ring-offset-2 ring-offset-white;
+  }
+
+  /* Numeric data (report IDs, stats, dates, coordinates) */
+  .font-data {
+    @apply font-mono tabular-nums;
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply mx-auto w-full max-w-container px-5 sm:px-6 lg:px-10;
+  }
+
+  /* Subtle topographic contour texture for the hero */
+  .bg-topo {
+    background-image: radial-gradient(circle at 18% 30%, transparent 0, transparent 100%);
+  }
+
+  /* Respect reduced-motion globally (Master PRD §4.1) */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Leaflet controls tuned to the design system */
+.leaflet-container {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #eef2f7;
+}
+.leaflet-bar a {
+  color: #1d4ed8;
+}
+
+/* Custom status pins */
+.pe-pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 3px 4px rgba(16, 24, 40, 0.25));
+}
+.pe-pin svg {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.16s ease-out;
+}
+.pe-pin-wrap:hover .pe-pin svg {
+  transform: scale(1.18) translateY(-2px);
+}
+.pe-pin-halo {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  border-radius: 9999px;
+  background: var(--pin);
+  opacity: 0.55;
+  animation: pe-halo 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pe-halo {
+  0% { transform: scale(0.6); opacity: 0.6; }
+  70% { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Popup card styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  box-shadow: 0 12px 32px -8px rgba(16, 24, 40, 0.28);
+  padding: 0;
+}
+.leaflet-popup-content {
+  margin: 0;
+  width: 240px !important;
+}
+.leaflet-popup-tip {
+  box-shadow: 0 12px 32px -8px rgba(16, 24, 40, 0.28);
+}

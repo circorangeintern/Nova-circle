@@ -1,0 +1,11 @@
+# Netlify build + SPA routing config
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Send every route to index.html so client-side routing works on refresh /
+# direct links (e.g. /map, /reports/PE-2026-004218).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
