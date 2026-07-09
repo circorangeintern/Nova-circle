@@ -1,3 +1,5 @@
+HEAD
+
 # PublicEye NG — Frontend
 
 A geotagged, photographic public infrastructure **accountability platform** for
@@ -10,18 +12,18 @@ dispute resolutions. This repo is the **frontend** (React + Vite + Tailwind).
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Framework | React 18 + Vite |
-| Styling | Tailwind CSS (design tokens in `tailwind.config.js`) |
-| Routing | React Router v6 |
-| Animation | Framer Motion |
-| Maps | Leaflet + React Leaflet |
-| Forms | React Hook Form + Zod *(report flow — next milestone)* |
-| State | Zustand *(multi-step form — next milestone)* |
-| Charts | Recharts *(dashboard — next milestone)* |
-| Toasts | react-hot-toast |
-| Icons | lucide-react |
+| Layer     | Choice                                                 |
+| --------- | ------------------------------------------------------ |
+| Framework | React 18 + Vite                                        |
+| Styling   | Tailwind CSS (design tokens in `tailwind.config.js`)   |
+| Routing   | React Router v6                                        |
+| Animation | Framer Motion                                          |
+| Maps      | Leaflet + React Leaflet                                |
+| Forms     | React Hook Form + Zod _(report flow — next milestone)_ |
+| State     | Zustand _(multi-step form — next milestone)_           |
+| Charts    | Recharts _(dashboard — next milestone)_                |
+| Toasts    | react-hot-toast                                        |
+| Icons     | lucide-react                                           |
 
 ## Getting started
 
@@ -67,7 +69,7 @@ All colour, typography, spacing, radius and elevation values live in
 hard-coded values in components.
 
 > **Display font note:** the mockups use a serif display face (`font-display`,
-> currently *Source Serif 4*). The written PRD lists *Sora*. To switch globally,
+> currently _Source Serif 4_). The written PRD lists _Sora_. To switch globally,
 > change the `display` family in `tailwind.config.js` — nothing else needs edits.
 
 ## Status — MVP (this build)
@@ -78,3 +80,10 @@ hard-coded values in components.
 
 **Next milestones:** Report submission flow → Public dashboard → Official portal
 (needs backend auth contract).
+=======
+
+# Nova-circle
+
+Orange internship program 2026
+
+16a5e13b9fcffa5b6d8d1468789579d78a7f90f4
