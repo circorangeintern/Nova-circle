@@ -7,7 +7,6 @@ import {
   Calendar,
   ThumbsUp,
   Share2,
-  ShieldAlert,
   Clock,
 } from 'lucide-react'
 import { ReportMap } from '@/components/map/ReportMap'
@@ -168,11 +167,6 @@ export default function ReportDetail() {
             <Button onClick={handleShare} variant="secondary" fullWidth icon={Share2} className="mt-3">
               Share report
             </Button>
-            {report.status === 'resolved' && (
-              <Button variant="danger" fullWidth icon={ShieldAlert} className="mt-3">
-                Dispute this resolution
-              </Button>
-            )}
           </Card>
 
           {/* Reporter card */}

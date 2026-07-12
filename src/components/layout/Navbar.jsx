@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Search, Plus, Menu, X, LogIn } from 'lucide-react'
+import { Search, Plus, Menu, X, LogIn, User } from 'lucide-react'
 import { Logo } from './Logo'
+import { AccountMenu } from './AccountMenu'
 import { Button } from '@/components/ui/Button'
+import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 import { cn } from '@/lib/cn'
 
 const NAV_LINKS = [
@@ -15,6 +17,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const { isAuthenticated, user, logout } = useCitizenAuthStore()
 
   return (
     <header className="sticky top-0 z-50 bg-navy-900 text-white shadow-e2">
@@ -64,6 +67,7 @@ export function Navbar() {
           >
             Official Login
           </Link>
+          <AccountMenu />
           <Button as={Link} to="/report" icon={Plus} className="bg-civic-500 hover:bg-civic-600">
             Report Issue
           </Button>
@@ -105,6 +109,35 @@ export function Navbar() {
                   {l.label}
                 </Link>
               ))}
+              <div className="my-1 h-px bg-white/10" />
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/account"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium text-white/85 hover:bg-white/10"
+                  >
+                    <User className="size-4" /> My Account
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout()
+                      setOpen(false)
+                    }}
+                    className="flex items-center gap-2 rounded-lg px-3 py-3 text-left text-base font-medium text-white/85 hover:bg-white/10"
+                  >
+                    <LogIn className="size-4 rotate-180" /> Log out{user ? ` (${user.name.split(' ')[0]})` : ''}
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium text-white/85 hover:bg-white/10"
+                >
+                  <User className="size-4" /> Sign in
+                </Link>
+              )}
               <Link
                 to="/official/login"
                 onClick={() => setOpen(false)}

@@ -27,7 +27,7 @@ export const reports = [
     coordinates: { lat: 6.5008, lng: 3.3486 },
     confirmations: 124,
     createdAt: '2026-07-08T12:10:00Z',
-    photo: 'https://images.unsplash.com/photo-1601581875039-e899893d520c?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/drainage-channel.jpg',
   },
   {
     id: 'PE-2026-004203',
@@ -42,7 +42,7 @@ export const reports = [
     coordinates: { lat: 4.9247, lng: 6.2642 },
     confirmations: 89,
     createdAt: '2026-07-07T09:32:00Z',
-    photo: 'https://images.unsplash.com/photo-1594708767771-a7502209ff51?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/school-no-roof.jpg',
   },
   {
     id: 'PE-2026-004190',
@@ -57,7 +57,7 @@ export const reports = [
     coordinates: { lat: 5.1315, lng: 7.3667 },
     confirmations: 176,
     createdAt: '2026-07-06T16:45:00Z',
-    photo: 'https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/dry-borehole.jpg',
   },
   {
     id: 'PE-2026-004155',
@@ -72,7 +72,7 @@ export const reports = [
     coordinates: { lat: 6.4413, lng: 7.4988 },
     confirmations: 241,
     createdAt: '2026-07-05T19:05:00Z',
-    photo: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/flooded-transformer.jpg',
   },
   {
     id: 'PE-2026-004101',
@@ -87,7 +87,7 @@ export const reports = [
     coordinates: { lat: 12.0022, lng: 8.5919 },
     confirmations: 58,
     createdAt: '2026-07-03T08:20:00Z',
-    photo: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/rusted-bridge-railing.jpg',
   },
   {
     id: 'PE-2026-004077',
@@ -102,7 +102,7 @@ export const reports = [
     coordinates: { lat: 6.335, lng: 5.6037 },
     confirmations: 93,
     createdAt: '2026-07-02T11:15:00Z',
-    photo: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=800&q=60',
+    photo: '/reports/market-road-pothole.jpg',
   },
 ]
 

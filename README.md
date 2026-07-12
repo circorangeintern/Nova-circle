@@ -1,14 +1,13 @@
-HEAD
-
 # PublicEye NG — Frontend
+
+> Repo: **Nova-circle** · Orange Internship Program 2026 (Circo Digital Academy)
 
 A geotagged, photographic public infrastructure **accountability platform** for
 Nigeria. Citizens document broken roads, dry boreholes, roofless schools and
 flooded transformers; officials respond in the open; the public can verify or
 dispute resolutions. This repo is the **frontend** (React + Vite + Tailwind).
 
-> Built for the Orange Internship (Circo Digital Academy). See the two PRDs for
-> the full product & design spec.
+> See the two PRDs for the full product & design spec.
 
 ## Tech stack
 
@@ -80,10 +79,3 @@ hard-coded values in components.
 
 **Next milestones:** Report submission flow → Public dashboard → Official portal
 (needs backend auth contract).
-=======
-
-# Nova-circle
-
-Orange internship program 2026
-
-16a5e13b9fcffa5b6d8d1468789579d78a7f90f4
