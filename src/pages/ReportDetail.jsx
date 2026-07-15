@@ -174,7 +174,7 @@ export default function ReportDetail() {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">Report summary</h3>
             <dl className="mt-3 space-y-2.5 text-sm">
               <SummaryRow label="Reporter" value="Anonymous citizen" />
-              <SummaryRow label="Submitted" value={timeAgo(report.createdAt)} />
+              <SummaryRow label="Reported" value={timeAgo(report.createdAt)} />
               <SummaryRow label="Category" value={category?.label} />
               <SummaryRow label="Severity" value={<SeverityBadge severity={report.severity} />} />
               <SummaryRow label="Current status" value={<StatusBadge status={report.status} size="sm" />} />

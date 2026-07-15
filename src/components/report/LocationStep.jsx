@@ -58,22 +58,13 @@ export function LocationStep({ value, onChange, error }) {
   const [accuracy, setAccuracy] = useState(null) // metres, GPS only
   const [geocoding, setGeocoding] = useState(false)
   const [showReporter, setShowReporter] = useState(false)
+  const [gpsNotice, setGpsNotice] = useState(false)
 
   // Search state
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [searching, setSearching] = useState(false)
   const debounceRef = useRef(null)
-
-  const requestedOnce = useRef(false)
-
-  // Auto-request GPS on first mount only.
-  useEffect(() => {
-    if (!requestedOnce.current && !value.coordinates) {
-      requestedOnce.current = true
-      locate()
-    }
-  }, [locate, value.coordinates])
 
   // When GPS resolves, capture accuracy + apply coords.
   useEffect(() => {
@@ -125,6 +116,11 @@ export function LocationStep({ value, onChange, error }) {
   const placeManually = (c) => {
     setAccuracy(null)
     applyCoords(c)
+  }
+
+  const requestGps = () => {
+    setGpsNotice(true)
+    locate()
   }
 
   const current = value.coordinates
@@ -212,12 +208,18 @@ export function LocationStep({ value, onChange, error }) {
           variant="secondary"
           size="sm"
           icon={LocateFixed}
-          onClick={locate}
+          onClick={requestGps}
           className="absolute right-3 top-3 z-[500] bg-white/95 shadow-e2 backdrop-blur"
         >
           Use GPS
         </Button>
       </div>
+
+      {gpsNotice && (
+        <p role="status" aria-live="polite" className="mt-3 text-sm text-slate">
+          Allow location access in your browser prompt to use this device&apos;s GPS. You can still search or place the pin manually.
+        </p>
+      )}
 
       {/* Low-accuracy warning */}
       {inaccurate && (

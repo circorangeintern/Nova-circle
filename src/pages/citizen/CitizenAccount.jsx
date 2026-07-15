@@ -82,7 +82,7 @@ export default function CitizenAccount() {
       {/* Contribution KPIs */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Kpi icon={FileText} label="Total reports" value={stats.total} color="text-civic-600" bg="bg-civic/10" />
-        <Kpi icon={TriangleAlert} label="Open" value={stats.open} color="text-accent" bg="bg-accent/10" />
+        <Kpi icon={TriangleAlert} label="Reported" value={stats.open} color="text-accent" bg="bg-accent/10" />
         <Kpi icon={Clock3} label="Being handled" value={stats.progress} color="text-civic-600" bg="bg-civic/10" />
         <Kpi icon={CheckCircle2} label="Resolved" value={stats.resolved} color="text-success" bg="bg-success/10" />
       </div>

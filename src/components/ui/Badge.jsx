@@ -4,11 +4,11 @@ import { STATUSES, SEVERITIES } from '@/lib/constants'
 /**
  * StatusBadge — colour-coded report status pill. Colour + label together so
  * status is never conveyed by colour alone (Master PRD §15 accessibility).
- * `pulse` adds a live dot for open / disputed states.
+ * `pulse` adds a live dot for newly reported issues.
  */
 export function StatusBadge({ status = 'open', size = 'md', className }) {
   const s = STATUSES[status] ?? STATUSES.open
-  const showPulse = status === 'open' || status === 'disputed'
+  const showPulse = status === 'open'
   return (
     <span
       className={cn(

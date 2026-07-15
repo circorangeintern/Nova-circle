@@ -20,7 +20,7 @@ let seq = 4300
 function buildTimeline(report) {
   // Seed a plausible timeline from the report's current status.
   const base = [
-    { status: 'open', label: 'Submitted', date: report.createdAt, party: 'Anonymous citizen', note: 'Report published to the public map.' },
+    { status: 'open', label: 'Reported', date: report.createdAt, party: 'Anonymous citizen', note: 'Report published to the public map.' },
   ]
   if (report.id === 'PE-2026-004218') return sampleTimeline
   return base
@@ -84,7 +84,7 @@ export async function createReport(payload) {
     ownerId: payload.ownerId ?? null, // links a report to a signed-in citizen
     reporter: payload.reporter ?? null, // { name, contact } — never shown publicly
     timeline: [
-      { status: 'open', label: 'Submitted', date: now, party: 'Anonymous citizen', note: 'Report published to the public map.' },
+      { status: 'open', label: 'Reported', date: now, party: 'Anonymous citizen', note: 'Report published to the public map.' },
     ],
   }
   repo = [report, ...repo]

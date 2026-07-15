@@ -1,13 +1,17 @@
-import 'leaflet/dist/leaflet.css'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { Link } from 'react-router-dom'
-import { StatusBadge, SeverityBadge } from '@/components/ui/Badge'
-import { CATEGORY_MAP } from '@/lib/constants'
-import { statusMarker } from './markerIcon'
-import { cn } from '@/lib/cn'
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { Link } from "react-router-dom";
+import { StatusBadge, SeverityBadge } from "@/components/ui/Badge";
+import { CATEGORY_MAP } from "@/lib/constants";
+import { statusMarker } from "./markerIcon";
+import { cn } from "@/lib/cn";
 
 // Nigeria-centred default view
-const NIGERIA_CENTER = [9.082, 8.6753]
+const NIGERIA_CENTER = [9.082, 8.6753];
+const NIGERIA_BOUNDS = [
+  [4.2, 2.7],
+  [13.9, 14.7],
+];
 
 /**
  * ReportMap — reusable Leaflet map rendering status-coloured report pins with
@@ -17,7 +21,7 @@ const NIGERIA_CENTER = [9.082, 8.6753]
 export function ReportMap({
   reports = [],
   center = NIGERIA_CENTER,
-  zoom = 6,
+  zoom = 6.4,
   className,
   scrollWheelZoom = false,
 }) {
@@ -26,16 +30,21 @@ export function ReportMap({
       center={center}
       zoom={zoom}
       scrollWheelZoom={scrollWheelZoom}
-      className={cn('size-full', className)}
+      className={cn("size-full", className)}
       zoomControl
+      minZoom={6.2}
+      maxZoom={10}
+      maxBounds={NIGERIA_BOUNDS}
+      maxBoundsViscosity={1.0}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
       {reports.map((report) => {
-        const category = CATEGORY_MAP[report.category]
-        const pulse = report.severity === 'critical' || report.status === 'open'
+        const category = CATEGORY_MAP[report.category];
+        const pulse =
+          report.severity === "critical" || report.status === "open";
         return (
           <Marker
             key={report.id}
@@ -71,8 +80,8 @@ export function ReportMap({
               </div>
             </Popup>
           </Marker>
-        )
+        );
       })}
     </MapContainer>
-  )
+  );
 }

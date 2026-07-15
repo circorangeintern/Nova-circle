@@ -1,33 +1,33 @@
-import { Link } from 'react-router-dom'
-import { Logo } from './Logo'
+import { Link } from "react-router-dom";
+import { Logo } from "./Logo";
 
 const COLUMNS = [
   {
-    title: 'Platform',
+    title: "Platform",
     links: [
-      { label: 'Public Map', to: '/map' },
-      { label: 'Dashboard', to: '/dashboard' },
-      { label: 'Report an Issue', to: '/report' },
-      { label: 'About', to: '/about' },
+      { label: "Public Map", to: "/map" },
+      { label: "Dashboard", to: "/dashboard" },
+      { label: "Report an Issue", to: "/report" },
+      { label: "About", to: "/about" },
     ],
   },
   {
-    title: 'For Officials',
+    title: "For Officials",
     links: [
-      { label: 'Official Login', to: '/official/login' },
-      { label: 'How Verification Works', to: '/about' },
-      { label: 'Accountability Data', to: '/dashboard' },
+      { label: "Official Login", to: "/official/login" },
+      { label: "How Verification Works", to: "/about" },
+      { label: "Accountability Data", to: "/dashboard" },
     ],
   },
   {
-    title: 'Resources',
+    title: "Resources",
     links: [
-      { label: 'Help Center', to: '/about' },
-      { label: 'Open Data', to: '/dashboard' },
-      { label: 'Privacy', to: '/about' },
+      { label: "Help Center", to: "/about" },
+      { label: "Open Data", to: "/dashboard" },
+      { label: "Privacy", to: "/about" },
     ],
   },
-]
+];
 
 export function Footer() {
   return (
@@ -36,8 +36,9 @@ export function Footer() {
         <div className="max-w-xs">
           <Logo />
           <p className="mt-4 text-sm leading-relaxed text-white/60">
-            A transparent public record of Nigeria's infrastructure — making failures impossible to
-            deny, impossible to hide, and politically costly to ignore.
+            A transparent public record of Nigeria's infrastructure making
+            failures impossible to deny, impossible to hide, and politically
+            costly to ignore.
           </p>
         </div>
         {COLUMNS.map((col) => (
@@ -48,7 +49,10 @@ export function Footer() {
             <ul className="mt-4 space-y-3 text-sm">
               {col.links.map((l) => (
                 <li key={l.label}>
-                  <Link to={l.to} className="text-white/70 transition-colors hover:text-white">
+                  <Link
+                    to={l.to}
+                    className="text-white/70 transition-colors hover:text-white"
+                  >
                     {l.label}
                   </Link>
                 </li>
@@ -59,10 +63,15 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col items-center justify-between gap-3 py-6 text-sm text-white/50 sm:flex-row">
-          <p>© {new Date().getFullYear()} PublicEye NG · Circo Digital Academy — Orange Internship</p>
-          <p className="font-data text-xs">Civic accountability, made visible.</p>
+          <p>
+            © {new Date().getFullYear()} PublicEye NG · Circo Digital Academy —
+            Orange Internship
+          </p>
+          <p className="font-data text-xs">
+            Civic accountability, made visible.
+          </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

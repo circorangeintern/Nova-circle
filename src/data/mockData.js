@@ -64,7 +64,7 @@ export const reports = [
     title: 'Flooded transformer poses electrocution risk',
     category: 'electricity',
     severity: 'critical',
-    status: 'disputed',
+    status: 'open',
     description:
       'A ground-level transformer on Ogui Road is sitting in floodwater. Sparks were seen last night. The LGA marked this resolved but the hazard is still present.',
     lga: 'Enugu North',
@@ -110,7 +110,7 @@ export const reports = [
 export const sampleTimeline = [
   {
     status: 'open',
-    label: 'Submitted',
+    label: 'Reported',
     date: '2026-07-08T12:10:00Z',
     note: 'Report published to the public map.',
     party: 'Anonymous citizen',
@@ -139,6 +139,6 @@ export const howItWorks = [
   {
     step: 3,
     title: 'Track Progress',
-    body: 'Your report goes on the public map. Officials respond in the open, and you can dispute false resolutions.',
+    body: 'Your report goes on the public map. Officials respond publicly, so you can track progress to resolution.',
   },
 ]

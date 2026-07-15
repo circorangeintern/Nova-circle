@@ -28,7 +28,7 @@ export function MapPreview() {
       <SectionHeading
         eyebrow="The living accountability map"
         title="See what's broken, where"
-        description="Every report is geotagged and colour-coded by status — open, acknowledged, in progress, resolved or disputed. Explore the full interactive map."
+        description="Every report is geotagged and colour-coded by status — reported, acknowledged, in progress or resolved. Explore the full interactive map."
       >
         <Button as={Link} to="/map" iconRight={Maximize2} className="hidden sm:inline-flex">
           Open full map

@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn'
 
 // Canonical lifecycle order (PRD §5.4 status timeline)
 const STAGES = [
-  { key: 'open', label: 'Submitted' },
+  { key: 'open', label: 'Reported' },
   { key: 'acknowledged', label: 'Acknowledged' },
   { key: 'progress', label: 'In Progress' },
   { key: 'resolved', label: 'Resolved' },
@@ -20,7 +20,7 @@ export function StatusTimeline({ events = [], currentStatus = 'open' }) {
   const eventByStatus = Object.fromEntries(events.map((e) => [e.status, e]))
   // Everything up to and including the current status is "complete".
   const currentIndex = STAGES.findIndex((s) => s.key === currentStatus)
-  const reachedIndex = currentStatus === 'disputed' ? 1 : currentIndex
+  const reachedIndex = currentIndex
 
   return (
     <ol className="relative">

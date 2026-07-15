@@ -46,14 +46,13 @@ export const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c])
 export const CORE_CATEGORIES = CATEGORIES.filter((c) => CORE_CATEGORY_KEYS.includes(c.key))
 
 // Report lifecycle statuses (semantic colours consistent everywhere).
-// `open` is the citizen-facing label for the PM PRD's "Reported" state.
+// `open` remains the stable API key for the citizen-facing "Reported" state.
 export const STATUSES = {
-  open: { key: 'open', label: 'Open', color: '#F97316', tint: '#FFF1E6' },
+  open: { key: 'open', label: 'Reported', color: '#F97316', tint: '#FFF1E6' },
   acknowledged: { key: 'acknowledged', label: 'Acknowledged', color: '#D97706', tint: '#FEF3C7' },
   progress: { key: 'progress', label: 'In Progress', color: '#2563EB', tint: '#DBEAFE' },
   resolved: { key: 'resolved', label: 'Resolved', color: '#16A34A', tint: '#DCFCE7' },
   // Post-MVP — kept defined for the design system; dispute UI is not surfaced in MVP.
-  disputed: { key: 'disputed', label: 'Disputed', color: '#DC2626', tint: '#FEE2E2' },
 }
 
 // The status flow an official can move a report through (MVP, in order).

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Eye, Camera, MapPin, LineChart } from 'lucide-react'
+import { Camera, MapPin, LineChart } from 'lucide-react'
 import { Logo } from '@/components/layout/Logo'
 import { TopoPattern } from '@/components/home/TopoPattern'
 
@@ -23,7 +23,7 @@ export function AuthShell({ children }) {
           <Logo />
         </Link>
         <div className="relative">
-          <Eye className="size-10 text-white/90" />
+          <img src="/publiceye-logo.jpg" alt="" width="40" height="40" className="size-10 rounded-full object-cover" />
           <h1 className="mt-4 font-display text-3xl font-bold leading-tight">
             Your voice matters — even before you have an account.
           </h1>
