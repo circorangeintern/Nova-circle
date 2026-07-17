@@ -1,0 +1,99 @@
+// PublicEye — Civic Infrastructure Accountability Platform
+// Prisma schema modeling the MVP entities from the PRD:
+// Citizens report infrastructure issues (photo, GPS, category, description),
+// Government Officials update report status, Public views/filters reports.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  CITIZEN
+  GOVERNMENT_OFFICIAL
+}
+
+enum ReportCategory {
+  ROAD
+  SCHOOL
+  WATER
+  ELECTRICITY
+}
+
+enum ReportStatus {
+  REPORTED
+  ACKNOWLEDGED
+  IN_PROGRESS
+  RESOLVED
+}
+
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CITIZEN)
+
+  // Only meaningful for GOVERNMENT_OFFICIAL accounts — used to scope which
+  // reports show up in their dashboard (MVP: simple text match, e.g. an LGA name)
+  jurisdiction String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reports          Report[]       @relation("CitizenReports")
+  statusUpdatesMade StatusHistory[] @relation("OfficialUpdates")
+
+  @@map("users")
+}
+
+model Report {
+  id          String         @id @default(uuid())
+  category    ReportCategory
+  description String         @db.VarChar(250)
+  photoUrl    String
+  latitude    Float
+  longitude   Float
+  status      ReportStatus   @default(REPORTED)
+
+  citizenId   String
+  citizen     User           @relation("CitizenReports", fields: [citizenId], references: [id])
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  statusHistory StatusHistory[]
+
+  @@index([category])
+  @@index([status])
+  @@map("reports")
+}
+
+// Keeps an audit trail every time a status changes (Reported → Acknowledged →
+// In Progress → Resolved). Also powers the Analytics module's "monthly summary".
+model StatusHistory {
+  id         String       @id @default(uuid())
+  reportId   String
+  report     Report       @relation(fields: [reportId], references: [id])
+
+  status     ReportStatus
+  changedById String
+  changedBy  User         @relation("OfficialUpdates", fields: [changedById], references: [id])
+
+  createdAt  DateTime     @default(now())
+
+  @@index([reportId])
+  @@map("status_history")
+}

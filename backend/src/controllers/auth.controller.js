@@ -1,0 +1,63 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const prisma = require('../config/db');
+const { registerSchema, loginSchema } = require('../utils/validation');
+
+function signToken(user) {
+  return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  });
+}
+
+function toPublicUser(user) {
+  const { passwordHash, ...rest } = user;
+  return rest;
+}
+
+// POST /api/auth/register  (Citizens only self-register in the MVP;
+// government officials are seeded/created by an admin process)
+async function register(req, res, next) {
+  try {
+    const data = registerSchema.parse(req.body);
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const user = await prisma.user.create({
+      data: { name: data.name, email: data.email, passwordHash, role: 'CITIZEN' },
+    });
+
+    const token = signToken(user);
+    res.status(201).json({ user: toPublicUser(user), token });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// POST /api/auth/login
+async function login(req, res, next) {
+  try {
+    const data = loginSchema.parse(req.body);
+    const user = await prisma.user.findUnique({ where: { email: data.email } });
+
+    if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) {
+      return res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'Email or password is incorrect' });
+    }
+
+    const token = signToken(user);
+    res.status(200).json({ user: toPublicUser(user), token });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET /api/auth/me
+async function me(req, res, next) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(404).json({ error: 'NOT_FOUND', message: 'User not found' });
+    res.status(200).json({ user: toPublicUser(user) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, me };
