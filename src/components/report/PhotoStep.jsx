@@ -10,7 +10,8 @@ import { cn } from '@/lib/cn'
  * `value` is a data URL; `onChange(dataUrl)` updates the form.
  */
 export function PhotoStep({ value, onChange, error }) {
-  const inputRef = useRef(null)
+  const cameraInputRef = useRef(null)
+  const galleryInputRef = useRef(null)
   const [busy, setBusy] = useState(false)
   const [localError, setLocalError] = useState('')
   const [meta, setMeta] = useState(null)
@@ -42,19 +43,27 @@ export function PhotoStep({ value, onChange, error }) {
       <p className="mt-1 text-slate">Your photo is the evidence. A clear, close-up shot makes your report stronger.</p>
 
       <input
-        ref={inputRef}
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
         onChange={handleFile}
         className="sr-only"
-        aria-label="Take or upload a photo"
+        aria-label="Take a photo of the issue"
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        className="sr-only"
+        aria-label="Choose a photo from your gallery"
       />
 
       {!value ? (
         <button
           type="button"
-          onClick={() => inputRef.current?.click()}
+          onClick={() => cameraInputRef.current?.click()}
           disabled={busy}
           className={cn(
             'mt-5 flex w-full flex-col items-center justify-center gap-3 rounded-panel border-2 border-dashed border-line bg-surface px-6 py-14 text-center transition-colors hover:border-civic/50 hover:bg-civic/[0.03]',
@@ -87,9 +96,14 @@ export function PhotoStep({ value, onChange, error }) {
                 Compressed to {formatBytes(meta.approxSize)} · {meta.width}×{meta.height}px
               </span>
             )}
-            <Button type="button" variant="secondary" size="sm" icon={RotateCcw} onClick={() => inputRef.current?.click()}>
-              Retake / choose another
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" size="sm" icon={RotateCcw} onClick={() => cameraInputRef.current?.click()}>
+                Take another photo
+              </Button>
+              <Button type="button" variant="ghost" size="sm" icon={ImagePlus} onClick={() => galleryInputRef.current?.click()}>
+                Choose from gallery
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -106,7 +120,7 @@ export function PhotoStep({ value, onChange, error }) {
       )}
 
       {!value && (
-        <Button type="button" variant="ghost" icon={ImagePlus} className="mt-4" onClick={() => inputRef.current?.click()}>
+        <Button type="button" variant="ghost" icon={ImagePlus} className="mt-4" onClick={() => galleryInputRef.current?.click()}>
           Choose from gallery
         </Button>
       )}
