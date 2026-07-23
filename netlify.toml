@@ -1,5 +1,6 @@
 # Netlify build + SPA routing config
 [build]
+  base = "frontend"
   command = "npm run build"
   publish = "dist"
 

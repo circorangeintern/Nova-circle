@@ -13,7 +13,7 @@ export function ReviewStep({ value, onEdit }) {
   return (
     <div>
       <h2 className="text-h3 font-bold text-ink">Review your report</h2>
-      <p className="mt-1 text-slate">This is exactly what the public will see. Photo, description, category and location can't be changed after submitting.</p>
+      <p className="mt-1 text-slate">This is exactly what the public will see. You can edit it until an official responds.</p>
 
       <div className="mt-5 overflow-hidden rounded-panel border border-line shadow-e1">
         {value.photo && (

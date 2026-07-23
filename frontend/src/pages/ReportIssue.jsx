@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { ProgressStepper } from '@/components/report/ProgressStepper'
 import { PhotoStep } from '@/components/report/PhotoStep'
 import { DetailsStep } from '@/components/report/DetailsStep'
@@ -106,24 +107,34 @@ export default function ReportIssue() {
         return
       }
     }
+    if (!citizen) {
+      toast.error('Sign in or create an account to publish this report.')
+      navigate('/login', { state: { from: '/report' } })
+      return
+    }
     setSubmitting(true)
-    const { id } = await createReport({
-      photo: form.photo,
-      category: form.category,
-      severity: form.severity,
-      description: form.description.trim(),
-      coordinates: form.coordinates,
-      lga: form.lga,
-      state: form.state,
-      ownerId: citizen?.id ?? null,
-      reporter:
-        form.reporterName || form.reporterContact
-          ? { name: form.reporterName, contact: form.reporterContact }
-          : null,
-    })
-    localStorage.removeItem(DRAFT_KEY)
-    setSubmitting(false)
-    setReportId(id)
+    try {
+      const { id } = await createReport({
+        photo: form.photo,
+        category: form.category,
+        severity: form.severity,
+        description: form.description.trim(),
+        coordinates: form.coordinates,
+        lga: form.lga,
+        state: form.state,
+        address: form.address,
+        reporter:
+          form.reporterName || form.reporterContact
+            ? { name: form.reporterName, contact: form.reporterContact }
+            : null,
+      })
+      localStorage.removeItem(DRAFT_KEY)
+      setReportId(id)
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const reset = () => {

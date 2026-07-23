@@ -14,7 +14,7 @@ const schema = z.object({
   password: z.string().min(1, 'Enter your password.'),
 })
 
-/** Official login (Master PRD §3.7). Uses RHF + Zod. Mock auth for MVP. */
+/** Official login (Master PRD §3.7). Uses RHF + Zod and backend JWT auth. */
 export default function OfficialLogin() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -110,11 +110,6 @@ export default function OfficialLogin() {
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
-
-          {/* Demo hint — remove once real auth is wired */}
-          <div className="mt-6 rounded-card border border-line bg-white p-3 text-xs text-muted">
-            <span className="font-semibold text-slate">Demo login:</span> official@publiceye.ng · publiceye
-          </div>
 
           <p className="mt-6 text-center text-sm text-muted">
             <Link to="/" className="font-medium text-civic-600 hover:underline">

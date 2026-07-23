@@ -8,7 +8,7 @@ import { LocationStep } from '@/components/report/LocationStep'
 import { Button } from '@/components/ui/Button'
 import { PageLoader } from '@/components/common/PageLoader'
 import { DESCRIPTION_MIN } from '@/lib/constants'
-import { getReportById, updateReport } from '@/services/api'
+import { getCitizenReportById, updateReport } from '@/services/api'
 import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 
 /** EditReport — a citizen edits their OWN report while it's still Open. */
@@ -22,22 +22,24 @@ export default function EditReport() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    getReportById(id).then((report) => {
-      if (!report) return setState('notfound')
-      if (report.ownerId !== user?.id) return setState('forbidden')
-      if (report.status !== 'open') return setState('forbidden')
-      setForm({
-        photo: report.photo,
-        category: report.category,
-        severity: report.severity,
-        description: report.description,
-        coordinates: report.coordinates,
-        lga: report.lga,
-        state: report.state,
-        address: '',
+    getCitizenReportById(id)
+      .then((report) => {
+        if (!report) return setState('notfound')
+        if (report.ownerId !== user?.id) return setState('forbidden')
+        if (report.status !== 'open') return setState('forbidden')
+        setForm({
+          photo: report.photo,
+          category: report.category,
+          severity: report.severity,
+          description: report.description,
+          coordinates: report.coordinates,
+          lga: report.lga,
+          state: report.state,
+          address: report.address,
+        })
+        setState('ok')
       })
-      setState('ok')
-    })
+      .catch(() => setState('notfound'))
   }, [id, user])
 
   const update = (partial) => setForm((f) => ({ ...f, ...partial }))

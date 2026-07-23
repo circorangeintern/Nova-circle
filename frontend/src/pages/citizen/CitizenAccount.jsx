@@ -34,7 +34,14 @@ export default function CitizenAccount() {
   const [tab, setTab] = useState('reports')
 
   const load = () => {
-    if (user) getReportsByUser(user.id).then(setReports)
+    if (user) {
+      getReportsByUser()
+        .then(setReports)
+        .catch((error) => {
+          toast.error(error.message)
+          setReports([])
+        })
+    }
   }
   useEffect(load, [user])
 
@@ -111,7 +118,7 @@ export default function CitizenAccount() {
           reports === null ? (
             <PageLoader />
           ) : (
-            <MyReports reports={reports} onChanged={load} userId={user.id} />
+            <MyReports reports={reports} onChanged={load} />
           )
         ) : (
           <Settings onLoggedOut={() => navigate('/')} />
@@ -134,13 +141,13 @@ function Kpi({ icon: Icon, label, value, color, bg }) {
 }
 
 /* -------------------------------- My Reports ------------------------------- */
-function MyReports({ reports, onChanged, userId }) {
+function MyReports({ reports, onChanged }) {
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
   const confirmDelete = async () => {
     setDeleting(true)
-    const res = await deleteReport(toDelete.id, userId)
+    const res = await deleteReport(toDelete.id)
     setDeleting(false)
     setToDelete(null)
     if (res.ok) {
@@ -239,15 +246,19 @@ function Settings({ onLoggedOut }) {
   const { user, logout, updateProfile, changePassword, deleteAccount } = useCitizenAuthStore()
   const [name, setName] = useState(user.name)
   const [anon, setAnon] = useState(user.prefs?.defaultAnonymous ?? true)
+  const [profileSaving, setProfileSaving] = useState(false)
   const [pw, setPw] = useState({ current: '', next: '' })
   const [pwSaving, setPwSaving] = useState(false)
   const [pwError, setPwError] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  const saveProfile = () => {
-    updateProfile({ name: name.trim(), prefs: { defaultAnonymous: anon } })
-    toast.success('Settings saved.')
+  const saveProfile = async () => {
+    setProfileSaving(true)
+    const res = await updateProfile({ name: name.trim(), prefs: { defaultAnonymous: anon } })
+    setProfileSaving(false)
+    if (res.ok) toast.success('Settings saved.')
+    else toast.error(res.error)
   }
 
   const savePassword = async () => {
@@ -275,8 +286,12 @@ function Settings({ onLoggedOut }) {
 
   const doDelete = async () => {
     setDeleting(true)
-    await deleteAccount()
+    const res = await deleteAccount()
     setDeleting(false)
+    if (!res.ok) {
+      toast.error(res.error)
+      return
+    }
     setConfirmDelete(false)
     toast.success('Your account has been deleted.')
     onLoggedOut()
@@ -301,7 +316,7 @@ function Settings({ onLoggedOut }) {
             </div>
             <Toggle checked={anon} onChange={setAnon} label="Report anonymously by default" />
           </div>
-          <Button onClick={saveProfile} icon={ShieldCheck}>
+          <Button onClick={saveProfile} icon={ShieldCheck} loading={profileSaving}>
             Save changes
           </Button>
         </div>

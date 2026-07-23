@@ -4,7 +4,6 @@ import { Check, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { OFFICIAL_STATUS_FLOW, STATUSES } from '@/lib/constants'
 import { updateReportStatus } from '@/services/api'
-import { useAuthStore } from '@/store/authStore'
 import { cn } from '@/lib/cn'
 
 const WORKFLOW_LABELS = {
@@ -20,24 +19,26 @@ const WORKFLOW_LABELS = {
  * reports — those affordances are intentionally absent, not merely disabled.
  */
 export function StatusUpdatePanel({ report, onUpdated }) {
-  const user = useAuthStore((s) => s.user)
   const [selected, setSelected] = useState(report.status)
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
 
   const changed = selected !== report.status
+  const currentIndex = OFFICIAL_STATUS_FLOW.indexOf(report.status)
+  const nextStatus = OFFICIAL_STATUS_FLOW[currentIndex + 1] ?? null
 
   const save = async () => {
     if (!changed) return
     setSaving(true)
-    const updated = await updateReportStatus(report.id, selected, note.trim(), user ?? {})
-    setSaving(false)
-    if (updated) {
+    try {
+      const updated = await updateReportStatus(report.id, selected, note.trim())
       toast.success(`Status updated to "${WORKFLOW_LABELS[selected]}".`)
       setNote('')
       onUpdated?.(updated)
-    } else {
-      toast.error('Could not update the report. Please try again.')
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -54,15 +55,18 @@ export function StatusUpdatePanel({ report, onUpdated }) {
           const s = STATUSES[key]
           const isCurrent = report.status === key
           const isSelected = selected === key
+          const selectable = key === report.status || key === nextStatus
           return (
             <button
               key={key}
               type="button"
               onClick={() => setSelected(key)}
+              disabled={!selectable}
               aria-pressed={isSelected}
               className={cn(
                 'flex w-full items-center gap-3 rounded-card border-2 p-3 text-left transition-colors',
                 isSelected ? 'shadow-e1' : 'border-line hover:border-civic/40',
+                !selectable && 'cursor-not-allowed opacity-45',
               )}
               style={isSelected ? { borderColor: s.color, backgroundColor: `${s.color}0d` } : undefined}
             >

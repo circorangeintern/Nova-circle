@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { PageLoader } from '@/components/common/PageLoader'
 import { CATEGORY_MAP } from '@/lib/constants'
 import { formatDateTime } from '@/lib/format'
-import { getReportById } from '@/services/api'
+import { getOfficialReportById } from '@/services/api'
 
 /** Official report detail — citizen content is READ-ONLY; only status changes. */
 export default function OfficialReportDetail() {
@@ -19,10 +19,10 @@ export default function OfficialReportDetail() {
 
   useEffect(() => {
     setLoading(true)
-    getReportById(id).then((data) => {
-      setReport(data)
-      setLoading(false)
-    })
+    getOfficialReportById(id)
+      .then(setReport)
+      .catch(() => setReport(null))
+      .finally(() => setLoading(false))
   }, [id])
 
   if (loading) return <PageLoader />

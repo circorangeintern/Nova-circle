@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Search, ChevronRight, ChevronUp, MapPin } from 'lucide-react'
 import { StatusBadge, SeverityBadge } from '@/components/ui/Badge'
 import { CATEGORY_MAP, CORE_CATEGORIES, STATUSES, OFFICIAL_STATUS_FLOW } from '@/lib/constants'
-import { getReports } from '@/services/api'
+import { getOfficialReports } from '@/services/api'
 import { timeAgo } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -21,10 +21,10 @@ export default function OfficialReports() {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    getReports().then((data) => {
-      setReports(data)
-      setLoading(false)
-    })
+    getOfficialReports()
+      .then(setReports)
+      .catch(() => setReports([]))
+      .finally(() => setLoading(false))
   }, [])
 
   const filtered = useMemo(() => {

@@ -1,112 +1,99 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-/* ---------------------------------------------------------------------------
-   Citizen auth store (MOCK for MVP — no real backend yet).
-
-   Accounts are OPTIONAL: anyone can still report anonymously. Signing in unlocks
-   a personal account area — contribution stats, and the ability to edit/delete
-   your own reports while they are still "Open".
-
-   Backend dev: replace register/login/deleteAccount with real API calls +
-   secure session cookies. The mock "user database" lives in localStorage under
-   `publiceye-citizens` (passwords in plain text — DEMO ONLY, never ship this).
---------------------------------------------------------------------------- */
-
-const DB_KEY = 'publiceye-citizens'
-
-const readDB = () => {
-  try {
-    return JSON.parse(localStorage.getItem(DB_KEY)) ?? []
-  } catch {
-    return []
-  }
-}
-const writeDB = (users) => localStorage.setItem(DB_KEY, JSON.stringify(users))
-
-// Public view of a user (never expose the password to the app state).
-const publicUser = (u) => ({
-  id: u.id,
-  name: u.name,
-  email: u.email,
-  createdAt: u.createdAt,
-  prefs: u.prefs ?? { defaultAnonymous: true },
-})
-
-let idSeed = 1000
+import {
+  changeCurrentPassword,
+  deleteCurrentAccount,
+  getCurrentUser,
+  loginAccount,
+  registerAccount,
+  updateCurrentUser,
+} from '@/services/api'
 
 export const useCitizenAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
 
       register: async ({ name, email, password }) => {
-        await new Promise((r) => setTimeout(r, 500))
-        const users = readDB()
-        const normalized = email.trim().toLowerCase()
-        if (users.some((u) => u.email === normalized)) {
-          return { ok: false, error: 'An account with this email already exists. Try signing in.' }
+        try {
+          const session = await registerAccount({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+          })
+          set({ user: session.user, token: session.token, isAuthenticated: true })
+          return { ok: true }
+        } catch (error) {
+          return { ok: false, error: error.message }
         }
-        idSeed += 1
-        const newUser = {
-          id: `cz_${idSeed}`,
-          name: name.trim(),
-          email: normalized,
-          password,
-          createdAt: new Date().toISOString(),
-          prefs: { defaultAnonymous: true },
-        }
-        writeDB([...users, newUser])
-        set({ user: publicUser(newUser), isAuthenticated: true })
-        return { ok: true }
       },
 
       login: async ({ email, password }) => {
-        await new Promise((r) => setTimeout(r, 500))
-        const users = readDB()
-        const normalized = email.trim().toLowerCase()
-        const found = users.find((u) => u.email === normalized)
-        if (!found || found.password !== password) {
-          return { ok: false, error: "The email or password you entered doesn't match our records." }
+        try {
+          const session = await loginAccount({ email, password })
+          if (session.role !== 'CITIZEN') {
+            return { ok: false, error: 'Government accounts must use the official portal.' }
+          }
+          set({ user: session.user, token: session.token, isAuthenticated: true })
+          return { ok: true }
+        } catch (error) {
+          return { ok: false, error: error.message }
         }
-        set({ user: publicUser(found), isAuthenticated: true })
-        return { ok: true }
       },
 
-      logout: () => set({ user: null, isAuthenticated: false }),
-
-      updateProfile: (patch) => {
-        const current = get().user
-        if (!current) return
-        const users = readDB().map((u) =>
-          u.id === current.id ? { ...u, ...patch, prefs: { ...u.prefs, ...(patch.prefs ?? {}) } } : u,
-        )
-        writeDB(users)
-        const updated = users.find((u) => u.id === current.id)
-        set({ user: publicUser(updated) })
+      refreshSession: async () => {
+        const token = get().token
+        if (!token) return false
+        try {
+          const user = await getCurrentUser(token)
+          if (user.backendRole !== 'CITIZEN') throw new Error('Invalid citizen session')
+          set({ user, isAuthenticated: true })
+          return true
+        } catch {
+          set({ user: null, token: null, isAuthenticated: false })
+          return false
+        }
       },
 
-      changePassword: async ({ current: currentPw, next }) => {
-        await new Promise((r) => setTimeout(r, 400))
-        const current = get().user
-        const users = readDB()
-        const me = users.find((u) => u.id === current?.id)
-        if (!me || me.password !== currentPw) {
-          return { ok: false, error: 'Your current password is incorrect.' }
+      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+
+      updateProfile: async (patch) => {
+        const token = get().token
+        try {
+          const user = await updateCurrentUser(token, patch)
+          set({ user })
+          return { ok: true, user }
+        } catch (error) {
+          return { ok: false, error: error.message }
         }
-        writeDB(users.map((u) => (u.id === me.id ? { ...u, password: next } : u)))
-        return { ok: true }
+      },
+
+      changePassword: async (values) => {
+        const token = get().token
+        try {
+          await changeCurrentPassword(token, values)
+          return { ok: true }
+        } catch (error) {
+          return { ok: false, error: error.message }
+        }
       },
 
       deleteAccount: async () => {
-        await new Promise((r) => setTimeout(r, 500))
-        const current = get().user
-        if (current) writeDB(readDB().filter((u) => u.id !== current.id))
-        set({ user: null, isAuthenticated: false })
-        return { ok: true }
+        const token = get().token
+        try {
+          await deleteCurrentAccount(token)
+          set({ user: null, token: null, isAuthenticated: false })
+          return { ok: true }
+        } catch (error) {
+          return { ok: false, error: error.message }
+        }
       },
     }),
-    { name: 'publiceye-citizen-session' },
+    {
+      name: 'publiceye-citizen-session',
+      partialize: ({ user, token, isAuthenticated }) => ({ user, token, isAuthenticated }),
+    },
   ),
 )
