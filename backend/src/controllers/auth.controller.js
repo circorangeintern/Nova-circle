@@ -1,7 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/db');
-const { registerSchema, loginSchema } = require('../utils/validation');
+const {
+  registerSchema,
+  loginSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+} = require('../utils/validation');
 
 function signToken(user) {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -60,4 +65,58 @@ async function me(req, res, next) {
   }
 }
 
-module.exports = { register, login, me };
+// PATCH /api/auth/me
+async function updateMe(req, res, next) {
+  try {
+    const data = updateProfileSchema.parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data,
+    });
+    res.status(200).json({ user: toPublicUser(user) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// PATCH /api/auth/password
+async function changePassword(req, res, next) {
+  try {
+    const data = changePasswordSchema.parse(req.body);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+    if (!user || !(await bcrypt.compare(data.currentPassword, user.passwordHash))) {
+      return res.status(401).json({
+        error: 'INVALID_CREDENTIALS',
+        message: 'Current password is incorrect',
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(data.newPassword, 10);
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { passwordHash },
+    });
+    res.status(200).json({ message: 'Password updated' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// DELETE /api/auth/me (citizens only; reports remain public and become unlinked)
+async function deleteMe(req, res, next) {
+  try {
+    if (req.user.role !== 'CITIZEN') {
+      return res.status(403).json({
+        error: 'FORBIDDEN',
+        message: 'Official accounts cannot be deleted through this endpoint',
+      });
+    }
+    await prisma.user.delete({ where: { id: req.user.id } });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, me, updateMe, changePassword, deleteMe };

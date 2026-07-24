@@ -94,8 +94,8 @@ export default function CitizenLogin() {
         </Link>
       </p>
       <p className="mt-3 text-center text-xs text-muted">
-        <Link to="/report" className="hover:underline">
-          Or report an issue without an account →
+        <Link to="/map" className="hover:underline">
+          Explore public reports →
         </Link>
       </p>
     </AuthShell>

@@ -3,6 +3,15 @@
 function errorHandler(err, req, res, next) {
   console.error(err);
 
+  if (err.name === 'MulterError' || err.message === 'Only JPEG, PNG, or WEBP images are allowed') {
+    return res.status(400).json({
+      error: 'VALIDATION_ERROR',
+      message: err.code === 'LIMIT_FILE_SIZE'
+        ? 'Photo must be 5MB or smaller'
+        : err.message,
+    });
+  }
+
   if (err.name === 'ZodError') {
     return res.status(400).json({
       error: 'VALIDATION_ERROR',

@@ -14,7 +14,9 @@ export default function Home() {
 
   useEffect(() => {
     let alive = true
-    getPlatformStats().then((data) => alive && setStats(data))
+    getPlatformStats()
+      .then((data) => alive && setStats(data))
+      .catch(() => {})
     return () => {
       alive = false
     }

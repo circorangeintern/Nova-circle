@@ -11,9 +11,19 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+}));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use(
+  '/uploads',
+  express.static(path.resolve(__dirname, '..', process.env.UPLOAD_DIR || 'uploads')),
+);
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 

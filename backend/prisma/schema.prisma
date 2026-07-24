@@ -35,6 +35,13 @@ enum ReportStatus {
   RESOLVED
 }
 
+enum ReportSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 // ─────────────────────────────────────────────
 // MODELS
 // ─────────────────────────────────────────────
@@ -45,6 +52,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role     @default(CITIZEN)
+  defaultAnonymous Boolean @default(true)
 
   // Only meaningful for GOVERNMENT_OFFICIAL accounts — used to scope which
   // reports show up in their dashboard (MVP: simple text match, e.g. an LGA name)
@@ -61,15 +69,23 @@ model User {
 
 model Report {
   id          String         @id @default(uuid())
+  title       String?        @db.VarChar(140)
   category    ReportCategory
+  severity    ReportSeverity @default(MEDIUM)
   description String         @db.VarChar(250)
   photoUrl    String
   latitude    Float
   longitude   Float
+  lga         String?        @db.VarChar(100)
+  state       String?        @db.VarChar(100)
+  address     String?        @db.VarChar(300)
+  reporterName String?       @db.VarChar(100)
+  reporterContact String?    @db.VarChar(100)
+  confirmations Int          @default(0)
   status      ReportStatus   @default(REPORTED)
 
-  citizenId   String
-  citizen     User           @relation("CitizenReports", fields: [citizenId], references: [id])
+  citizenId   String?
+  citizen     User?          @relation("CitizenReports", fields: [citizenId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -89,6 +105,7 @@ model StatusHistory {
   report     Report       @relation(fields: [reportId], references: [id])
 
   status     ReportStatus
+  note       String?      @db.VarChar(500)
   changedById String
   changedBy  User         @relation("OfficialUpdates", fields: [changedById], references: [id])
 
