@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(grep -rlnE *)",
+      "Bash(cp README.md /tmp/README.bak)",
+      "Bash(awk 'NR==1 && $0==\"HEAD\"{next} /^=======$/{exit} {print}' README.md)",
+      "Bash(mv /tmp/README.clean README.md)",
+      "Bash(grep -cE *)",
+      "Bash(git check-ignore *)",
+      "Read(//tmp/**)",
+      "Bash(docx2txt .)",
+      "Bash(cp word/document.xml /tmp/doc.xml)",
+      "Bash(perl -0777 -ne ' *)",
+      "Bash(curl -s -o /dev/null -w \"dev server: HTTP %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(mkdir -p public/reports)",
+      "Bash(cp \"C:/Users/USER/Downloads/Collasped drainage channel blocking access road.jpg\" public/reports/drainage-channel.jpg)",
+      "Bash(cp \"C:/Users/USER/Downloads/Primary school with no roof after storm.jpg\" public/reports/school-no-roof.jpg)",
+      "Bash(cp \"C:/Users/USER/Downloads/Dry borehole leaves community without clean water.jpg\" public/reports/dry-borehole.jpg)",
+      "Bash(cp \"C:/Users/USER/Downloads/Flooded transformer poses electrocusion risk.jpg\" public/reports/flooded-transformer.jpg)"
+    ]
+  }
+}
