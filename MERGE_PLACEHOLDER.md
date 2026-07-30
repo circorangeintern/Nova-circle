@@ -1,1 +1,1 @@
-Merge commit placeholder
+Reverted placeholder: removing stray merge placeholder file.
