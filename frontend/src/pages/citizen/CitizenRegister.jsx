@@ -18,6 +18,7 @@ const schema = z
     email: z.string().min(1, 'Enter your email.').email('Enter a valid email address.'),
     password: z.string().min(8, 'Use at least 8 characters.'),
     confirm: z.string().min(1, 'Re-enter your password.'),
+    legalAccepted: z.literal(true, { errorMap: () => ({ message: 'You must accept the Terms & Conditions and Privacy Policy.' }) }),
   })
   .refine((d) => d.password === d.confirm, { path: ['confirm'], message: 'Passwords do not match.' })
 
@@ -32,7 +33,7 @@ export default function CitizenRegister() {
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', email: '', password: '', confirm: '' } })
+  } = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', email: '', password: '', confirm: '', legalAccepted: false } })
 
   const password = watch('password')
 
@@ -98,6 +99,19 @@ export default function CitizenRegister() {
         <AuthField label="Confirm password" error={errors.confirm?.message} icon={Lock}>
           <input type={showPw ? 'text' : 'password'} autoComplete="new-password" placeholder="Re-enter your password" {...field('confirm')} className={authInputCls(errors.confirm)} />
         </AuthField>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-surface p-3 text-sm text-slate">
+          <input
+            type="checkbox"
+            {...field('legalAccepted')}
+            className="mt-0.5 size-4 shrink-0 rounded border-line text-civic focus:ring-civic"
+            aria-describedby={errors.legalAccepted ? 'legal-error' : undefined}
+          />
+          <span>
+            I agree to the <Link to="/terms" className="font-semibold text-civic-600 hover:underline">Terms &amp; Conditions</Link> and acknowledge the <Link to="/privacy" className="font-semibold text-civic-600 hover:underline">Privacy Policy</Link>.
+          </span>
+        </label>
+        {errors.legalAccepted && <p id="legal-error" className="-mt-2 text-sm font-medium text-critical">{errors.legalAccepted.message}</p>}
 
         <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-2">
           {isSubmitting ? 'Creating account…' : 'Create account'}

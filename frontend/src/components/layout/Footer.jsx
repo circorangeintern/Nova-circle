@@ -24,7 +24,8 @@ const COLUMNS = [
     links: [
       { label: "Help Center", to: "/about" },
       { label: "Open Data", to: "/dashboard" },
-      { label: "Privacy", to: "/about" },
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms & Conditions", to: "/terms" },
     ],
   },
 ];

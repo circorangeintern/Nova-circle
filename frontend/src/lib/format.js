@@ -18,6 +18,15 @@ export function timeAgo(iso) {
   return new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/** Date only, e.g. "8 Jul 2026". */
+export function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 /** Full date, e.g. "8 Jul 2026, 12:10 PM". */
 export function formatDateTime(iso) {
   return new Date(iso).toLocaleString('en-NG', {

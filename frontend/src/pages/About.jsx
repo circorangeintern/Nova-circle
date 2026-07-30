@@ -29,7 +29,7 @@ export default function About() {
       <section className="container-page py-16 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <img
-            src="/publiceye-logo.jpg"
+            src="/publiceye-logo.png"
             alt="PublicEye NG"
             width="56"
             height="56"

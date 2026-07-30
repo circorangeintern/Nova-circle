@@ -150,6 +150,49 @@ export async function deleteReport(id, ownerId) {
   return { ok: true }
 }
 
+/* ---------------------------------------------------------------------------
+   PUBLIC (unauthenticated) reads — Public Accountability Dashboard.
+   These map 1:1 onto the backend contract:
+     getPublicReports  → GET /public/reports?category=&status=
+     getPublicSummary  → GET /analytics/summary
+   Both are deliberately citizen-identity-free: the payload is sanitised by
+   toPublicReport() so no reporter name/contact or ownerId can ever reach a
+   public screen, even accidentally.
+--------------------------------------------------------------------------- */
+
+/** Strips everything that is not safe to publish about a report. */
+function toPublicReport({ timeline, reporter, ownerId, ...pub }) {
+  return pub
+}
+
+/**
+ * getPublicReports — every published report, newest first, optionally narrowed
+ * by category and/or status. Read-only: no auth, no personal data.
+ */
+export async function getPublicReports(filters = {}) {
+  await delay()
+  let result = [...repo].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  if (filters.category) result = result.filter((r) => r.category === filters.category)
+  if (filters.status) result = result.filter((r) => r.status === filters.status)
+  return result.map(toPublicReport)
+}
+
+/**
+ * getPublicSummary — the five headline counts shown at the top of the public
+ * dashboard. Aggregate only; nothing here identifies a citizen.
+ */
+export async function getPublicSummary() {
+  await delay(250)
+  const count = (status) => repo.filter((r) => r.status === status).length
+  return {
+    total: repo.length,
+    resolved: count('resolved'),
+    inProgress: count('progress'),
+    acknowledged: count('acknowledged'),
+    reported: count('open'),
+  }
+}
+
 /** Aggregates for the official/analytics dashboard (Nova Circle PRD Feature 4). */
 export async function getReportStats() {
   await delay(300)

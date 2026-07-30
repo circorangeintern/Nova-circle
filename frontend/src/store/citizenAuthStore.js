@@ -41,7 +41,7 @@ export const useCitizenAuthStore = create(
       user: null,
       isAuthenticated: false,
 
-      register: async ({ name, email, password }) => {
+      register: async ({ name, email, password, legalAccepted }) => {
         await new Promise((r) => setTimeout(r, 500))
         const users = readDB()
         const normalized = email.trim().toLowerCase()
@@ -55,6 +55,7 @@ export const useCitizenAuthStore = create(
           email: normalized,
           password,
           createdAt: new Date().toISOString(),
+          legalAcceptedAt: legalAccepted ? new Date().toISOString() : null,
           prefs: { defaultAnonymous: true },
         }
         writeDB([...users, newUser])

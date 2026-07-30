@@ -51,6 +51,10 @@ export const Button = forwardRef(function Button(
   return (
     <Comp
       ref={ref}
+      // Buttons are frequently used for client-side navigation.  Defaulting to
+      // "button" prevents a surrounding form from treating actions such as
+      // "Continue" as a submit and interrupting the step transition.
+      type={Comp === 'button' ? (props.type ?? 'button') : undefined}
       disabled={Comp === 'button' ? isDisabled : undefined}
       aria-busy={loading || undefined}
       aria-disabled={isDisabled || undefined}

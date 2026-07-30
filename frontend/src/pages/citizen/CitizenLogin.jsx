@@ -94,6 +94,11 @@ export default function CitizenLogin() {
         </Link>
       </p>
       <p className="mt-3 text-center text-xs text-muted">
+        <Link to="/terms" className="hover:underline">Terms &amp; Conditions</Link>
+        <span aria-hidden="true"> · </span>
+        <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+      </p>
+      <p className="mt-3 text-center text-xs text-muted">
         <Link to="/report" className="hover:underline">
           Or report an issue without an account →
         </Link>

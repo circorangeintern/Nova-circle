@@ -23,7 +23,7 @@ export function AuthShell({ children }) {
           <Logo />
         </Link>
         <div className="relative">
-          <img src="/publiceye-logo.jpg" alt="" width="40" height="40" className="size-10 rounded-full object-cover" />
+          <img src="/publiceye-logo.png" alt="" width="40" height="40" className="size-10 rounded-full bg-white object-cover" />
           <h1 className="mt-4 font-display text-3xl font-bold leading-tight">
             Your voice matters — even before you have an account.
           </h1>

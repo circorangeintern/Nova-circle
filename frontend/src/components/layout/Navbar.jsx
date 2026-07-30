@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Search, Plus, Menu, X, LogIn, User } from 'lucide-react'
 import { Logo } from './Logo'
 import { AccountMenu } from './AccountMenu'
@@ -86,15 +85,8 @@ export function Navbar() {
       </nav>
 
       {/* Mobile drawer */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="overflow-hidden border-t border-white/10 lg:hidden"
-          >
+      {open && (
+          <div className="border-t border-white/10 lg:hidden">
             <div className="container-page flex flex-col gap-1 py-4">
               {NAV_LINKS.map((l) => (
                 <Link
@@ -157,9 +149,8 @@ export function Navbar() {
                 Report Issue
               </Button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </header>
   )
 }

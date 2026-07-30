@@ -14,6 +14,8 @@ const ReportIssue = lazy(() => import('@/pages/ReportIssue'))
 const ReportDetail = lazy(() => import('@/pages/ReportDetail'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const About = lazy(() => import('@/pages/About'))
+const Privacy = lazy(() => import('@/pages/Privacy'))
+const Terms = lazy(() => import('@/pages/Terms'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // Citizen accounts
@@ -48,6 +50,8 @@ export default function App() {
         <Route path="/reports/:id" element={L(<ReportDetail />)} />
         <Route path="/dashboard" element={L(<Dashboard />)} />
         <Route path="/about" element={L(<About />)} />
+        <Route path="/privacy" element={L(<Privacy />)} />
+        <Route path="/terms" element={L(<Terms />)} />
 
         {/* Citizen account (auth-gated) */}
         <Route

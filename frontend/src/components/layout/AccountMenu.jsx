@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { User, LayoutDashboard, FileText, LogOut, ChevronDown } from 'lucide-react'
 import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 
@@ -56,13 +55,8 @@ export function AccountMenu() {
         <ChevronDown className="size-4 text-white/70" />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
+      {open && (
+          <div
             className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-card border border-line bg-white py-1 shadow-e3"
             role="menu"
           >
@@ -83,9 +77,8 @@ export function AccountMenu() {
             >
               <LogOut className="size-4" /> Log out
             </button>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   )
 }

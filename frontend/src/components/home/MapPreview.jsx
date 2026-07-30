@@ -14,6 +14,7 @@ const ReportMap = lazy(() =>
 
 export function MapPreview() {
   const [reports, setReports] = useState([])
+  const [loadMap, setLoadMap] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -21,6 +22,18 @@ export function MapPreview() {
     return () => {
       alive = false
     }
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setLoadMap(true)
+        observer.disconnect()
+      }
+    }, { rootMargin: '300px' })
+    const target = document.getElementById('map-preview')
+    if (target) observer.observe(target)
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -37,10 +50,8 @@ export function MapPreview() {
 
       <Reveal className="mt-8">
         <div className="relative overflow-hidden rounded-panel border border-line shadow-e2">
-          <div className="h-[380px] w-full sm:h-[460px]">
-            <Suspense fallback={<MapSkeleton />}>
-              <ReportMap reports={reports} />
-            </Suspense>
+          <div id="map-preview" className="h-[380px] w-full sm:h-[460px]">
+            {loadMap ? <Suspense fallback={<MapSkeleton />}><ReportMap reports={reports} /></Suspense> : <MapSkeleton />}
           </div>
 
           {/* Legend overlay */}
