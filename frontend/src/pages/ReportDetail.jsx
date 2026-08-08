@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button'
 import { CATEGORY_MAP } from '@/lib/constants'
 import { formatDateTime, timeAgo } from '@/lib/format'
 import { getReportById, getReports } from '@/services/api'
+import { trackPublicReportViewed, trackReportConfirmed, trackReportShared } from '@/lib/analytics'
 
 export default function ReportDetail() {
   const { id } = useParams()
@@ -35,6 +36,15 @@ export default function ReportDetail() {
       setReport(data)
       setConfirmations(data?.confirmations ?? 0)
       setLoading(false)
+      if (data) {
+        trackPublicReportViewed(data.id, {
+          category: data.category,
+          status: data.status,
+          severity: data.severity,
+          lga: data.lga,
+          state: data.state,
+        })
+      }
     })
     getReports().then((all) => alive && setRelated(all.filter((r) => r.id !== id).slice(0, 3)))
     return () => {
@@ -47,6 +57,7 @@ export default function ReportDetail() {
     // Optimistic increment (PRD §5.4 optimistic UI)
     setConfirmed(true)
     setConfirmations((c) => c + 1)
+    trackReportConfirmed(id)
     toast.success('Thanks — your confirmation was added.')
   }
 
@@ -55,11 +66,13 @@ export default function ReportDetail() {
     if (navigator.share) {
       try {
         await navigator.share({ title: report.title, url })
+        trackReportShared(id, 'native_share')
       } catch {
         /* dismissed */
       }
     } else {
       await navigator.clipboard.writeText(url)
+      trackReportShared(id, 'clipboard')
       toast.success('Report link copied to clipboard.')
     }
   }

@@ -8,6 +8,7 @@ import { Logo } from '@/components/layout/Logo'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
 import { cn } from '@/lib/cn'
+import { identify, trackOfficialLoginSucceeded, trackOfficialLoginFailed } from '@/lib/analytics'
 
 const schema = z.object({
   email: z.string().min(1, 'Enter your official email.').email('Enter a valid email address.'),
@@ -32,8 +33,12 @@ export default function OfficialLogin() {
     setFormError('')
     const res = await login(values)
     if (res.ok) {
+      const user = useAuthStore.getState().user
+      if (user) identify(`official_${user.lga}_${user.state}`, { role: user.role, lga: user.lga, state: user.state })
+      trackOfficialLoginSucceeded()
       navigate(location.state?.from ?? '/official/dashboard', { replace: true })
     } else {
+      trackOfficialLoginFailed(res.error)
       setFormError(res.error)
     }
   }

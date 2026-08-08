@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 /**
  * useGeolocation — wraps the browser Geolocation API with clear status states
@@ -9,6 +9,7 @@ export function useGeolocation() {
   const [status, setStatus] = useState('idle') // idle | locating | success | error
   const [coords, setCoords] = useState(null) // { lat, lng, accuracy }
   const [error, setError] = useState('')
+  const requestId = useRef(0)
 
   const locate = useCallback(() => {
     if (!('geolocation' in navigator)) {
@@ -16,10 +17,17 @@ export function useGeolocation() {
       setError('Your device does not support location. You can drop the pin manually instead.')
       return
     }
+    if (!window.isSecureContext) {
+      setStatus('error')
+      setError('Location access requires a secure (HTTPS) connection. Please open this site using HTTPS.')
+      return
+    }
     setStatus('locating')
     setError('')
+    const currentRequest = ++requestId.current
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (currentRequest !== requestId.current) return
         setCoords({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -28,6 +36,7 @@ export function useGeolocation() {
         setStatus('success')
       },
       (err) => {
+        if (currentRequest !== requestId.current) return
         setStatus('error')
         const messages = {
           1: 'Location permission was denied. Enable it in your browser, or drop the pin manually.',
@@ -36,7 +45,7 @@ export function useGeolocation() {
         }
         setError(messages[err.code] ?? 'We could not get your location. Drop the pin manually.')
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
     )
   }, [])
 

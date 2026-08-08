@@ -18,6 +18,7 @@ import { PageLoader } from '@/components/common/PageLoader'
 import { CATEGORY_MAP, STATUSES } from '@/lib/constants'
 import { useAuthStore } from '@/store/authStore'
 import { getReportStats } from '@/services/api'
+import { trackOfficialDashboardViewed } from '@/lib/analytics'
 
 /** Official dashboard / analytics (Nova Circle PRD Feature 4). */
 export default function OfficialDashboard() {
@@ -25,7 +26,16 @@ export default function OfficialDashboard() {
   const [stats, setStats] = useState(null)
 
   useEffect(() => {
-    getReportStats().then(setStats)
+    getReportStats().then((data) => {
+      setStats(data)
+      if (data) {
+        trackOfficialDashboardViewed({
+          total: data.total,
+          resolved: data.resolved,
+          open: data.open,
+        })
+      }
+    })
   }, [])
 
   if (!stats) return <PageLoader />

@@ -1,27 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Camera, ImagePlus, RotateCcw, Loader2, Info, UploadCloud } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, ImagePlus, RotateCcw, Loader2, Info } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { CameraCapture, supportsWebcam } from '@/components/report/CameraCapture'
 import { compressImage, formatBytes } from '@/lib/image'
 import { cn } from '@/lib/cn'
-
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 /**
  * PhotoStep — capture or upload a photo of the issue. Compresses client-side
  * before storing (Nova Circle PRD non-functional requirement).
  * `value` is a data URL; `onChange(dataUrl)` updates the form.
- *
- * TWO DISTINCT PATHS, never conflated:
- *  - "Take a photo"  → phones: the native camera app via `capture="environment"`.
- *                      laptops: an in-page getUserMedia viewfinder, because
- *                      desktop browsers ignore `capture` and would otherwise
- *                      just open a file dialog.
- *  - "Upload from gallery" → a plain file input with NO `capture` attribute, so
- *                      the OS opens its photo picker / file browser. (A `capture`
- *                      attribute here is what previously sent gallery taps
- *                      straight to the camera.)
- * Laptops additionally get drag-and-drop and paste-from-clipboard.
  */
 export function PhotoStep({ value, onChange, error }) {
   const cameraInputRef = useRef(null)
@@ -29,199 +15,115 @@ export function PhotoStep({ value, onChange, error }) {
   const [busy, setBusy] = useState(false)
   const [localError, setLocalError] = useState('')
   const [meta, setMeta] = useState(null)
-  const [cameraOpen, setCameraOpen] = useState(false)
-  const [dragging, setDragging] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
+  const captureIdRef = useRef(0)
 
-  /** Shared pipeline for every source: input, camera, drop, paste. */
-  const processFile = useCallback(
-    async (file) => {
-      if (!file) return
-      if (!file.type?.startsWith('image/')) {
-        setLocalError('That file is not an image. Please choose a JPEG, PNG or WEBP photo.')
-        return
-      }
-      if (file.size > MAX_UPLOAD_BYTES) {
-        setLocalError('That image is very large. Please choose one under 15MB.')
-        return
-      }
-      setBusy(true)
-      setLocalError('')
-      try {
-        const result = await compressImage(file)
-        onChange(result.dataUrl)
-        setMeta(result)
-      } catch (err) {
-        setLocalError(err.message)
-      } finally {
-        setBusy(false)
-      }
-    },
-    [onChange],
-  )
-
-  const handleInputChange = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files?.[0]
-    // Reset first (and unconditionally, including on cancel) so picking the
-    // same file twice still fires a change event.
-    e.target.value = ''
-    processFile(file)
-  }
+    if (!file) return
+    // Phone cameras frequently create photos larger than 15 MB. They are
+    // reduced to a 1600px JPEG by compressImage, so do not reject them before
+    // the user can even see their capture.
+    const captureId = ++captureIdRef.current
+    setBusy(true)
+    setLocalError('')
 
-  const openGallery = () => galleryInputRef.current?.click()
-
-  /**
-   * Route to whichever camera actually works on this device.
-   * Touch-primary devices get the OS camera app; everything else gets the
-   * in-page viewfinder; if neither is possible we fall back to the file dialog.
-   */
-  const openCamera = () => {
-    const touchFirst =
-      typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
-    if (touchFirst) cameraInputRef.current?.click()
-    else if (supportsWebcam()) setCameraOpen(true)
-    else cameraInputRef.current?.click()
-  }
-
-  // Paste a screenshot or copied image (laptop convenience).
-  useEffect(() => {
-    const onPaste = (e) => {
-      // Never hijack a paste aimed at a text field — EditReport renders this
-      // step next to the description textarea.
-      const el = e.target
-      if (
-        el instanceof HTMLElement &&
-        (el.isContentEditable || /^(input|textarea|select)$/i.test(el.tagName))
-      ) {
-        return
+    // FileReader data URLs render consistently after a native camera app
+    // hands control back to mobile browsers, including where blob URLs do not.
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (captureId === captureIdRef.current && typeof reader.result === 'string') {
+        setPreviewUrl(reader.result)
       }
-      const item = Array.from(e.clipboardData?.items ?? []).find((i) =>
-        i.type.startsWith('image/'),
-      )
-      const file = item?.getAsFile()
-      if (file) processFile(file)
     }
-    window.addEventListener('paste', onPaste)
-    return () => window.removeEventListener('paste', onPaste)
-  }, [processFile])
-
-  const onDrop = (e) => {
-    e.preventDefault()
-    setDragging(false)
-    processFile(e.dataTransfer.files?.[0])
+    reader.readAsDataURL(file)
+    try {
+      const result = await compressImage(file)
+      if (captureId !== captureIdRef.current) return
+      onChange(result.dataUrl)
+      setMeta(result)
+      captureIdRef.current += 1 // ignore a late FileReader callback
+      setPreviewUrl('')
+    } catch (err) {
+      if (captureId !== captureIdRef.current) return
+      setLocalError(err.message)
+    } finally {
+      setBusy(false)
+      e.target.value = '' // allow re-selecting the same file
+    }
   }
+
+  const imageSrc = previewUrl || value
 
   return (
     <div>
       <h2 className="text-h3 font-bold text-ink">Add a photo of the issue</h2>
-      <p className="mt-1 text-slate">
-        Your photo is the evidence. A clear, close-up shot makes your report stronger.
-      </p>
+      <p className="mt-1 text-slate">Your photo is the evidence. A clear, close-up shot makes your report stronger.</p>
 
-      {/* Native camera app — phones only (desktop browsers ignore `capture`). */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={handleInputChange}
+        onChange={handleFile}
         className="sr-only"
-        tabIndex={-1}
-        aria-hidden="true"
+        aria-label="Take a photo of the issue"
       />
-      {/* Gallery / file picker — deliberately NO `capture` attribute. */}
       <input
         ref={galleryInputRef}
         type="file"
         accept="image/*"
-        onChange={handleInputChange}
+        onChange={handleFile}
         className="sr-only"
-        tabIndex={-1}
-        aria-hidden="true"
+        aria-label="Choose a photo from your gallery"
       />
 
-      {!value ? (
-        /* Drop zone — every action inside it is explicitly labelled. */
-        <div
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragging(true)
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={onDrop}
+      {!imageSrc ? (
+        <button
+          type="button"
+          onClick={() => cameraInputRef.current?.click()}
+          disabled={busy}
           className={cn(
-            'mt-5 rounded-panel border-2 border-dashed transition-colors',
-            dragging ? 'border-civic bg-civic/[0.06]' : 'border-line bg-surface',
-            (error || localError) && !dragging && 'border-critical/50',
+            'mt-5 flex w-full flex-col items-center justify-center gap-3 rounded-panel border-2 border-dashed border-line bg-surface px-6 py-14 text-center transition-colors hover:border-civic/50 hover:bg-civic/[0.03]',
+            (error || localError) && 'border-critical/50',
           )}
         >
           {busy ? (
-            <div className="flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
+            <>
               <Loader2 className="size-9 animate-spin text-civic-500" />
               <span className="font-semibold text-slate">Compressing image…</span>
-            </div>
+            </>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
+            <>
               <span className="grid size-16 place-items-center rounded-full bg-civic-500 text-white shadow-e1">
-                <Camera className="size-8" aria-hidden />
+                <Camera className="size-8" />
               </span>
-              <div>
-                <p className="font-semibold text-ink">Add a photo of the issue</p>
-                <p className="mt-1 text-sm text-muted">
-                  Take one now, or upload an existing photo.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Button type="button" icon={Camera} onClick={openCamera}>
-                  Take a photo
-                </Button>
-                <Button type="button" variant="secondary" icon={ImagePlus} onClick={openGallery}>
-                  Upload from gallery
-                </Button>
-              </div>
-
-              <p className="hidden items-center gap-1.5 text-xs text-muted sm:flex">
-                <UploadCloud className="size-3.5" aria-hidden />
-                or drag an image here, or paste one with Ctrl+V
-              </p>
-            </div>
+              <span className="font-semibold text-ink">Take a photo of the issue</span>
+              <span className="text-sm text-muted">or tap to choose from your gallery</span>
+            </>
           )}
-        </div>
+        </button>
       ) : (
         <div className="mt-5">
           <div className="overflow-hidden rounded-panel border border-line shadow-e1">
-            <img
-              src={value}
-              alt="Your report photo preview"
-              className="max-h-[420px] w-full object-cover"
-            />
+            <img src={imageSrc} alt="Your report photo preview" className="max-h-[420px] w-full object-cover" />
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            {meta && (
+            {busy ? (
+              <span className="inline-flex items-center gap-2 text-sm text-muted">
+                <Loader2 className="size-4 animate-spin text-civic-500" /> Saving your photo…
+              </span>
+            ) : meta && (
               <span className="text-sm text-muted">
                 Compressed to {formatBytes(meta.approxSize)} · {meta.width}×{meta.height}px
               </span>
             )}
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                icon={RotateCcw}
-                loading={busy}
-                onClick={openCamera}
-              >
-                Retake photo
+              <Button type="button" variant="secondary" size="sm" icon={RotateCcw} disabled={busy} onClick={() => cameraInputRef.current?.click()}>
+                Take another photo
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                icon={ImagePlus}
-                disabled={busy}
-                onClick={openGallery}
-              >
-                Upload a different photo
+              <Button type="button" variant="ghost" size="sm" icon={ImagePlus} disabled={busy} onClick={() => galleryInputRef.current?.click()}>
+                Choose from gallery
               </Button>
             </div>
           </div>
@@ -229,31 +131,21 @@ export function PhotoStep({ value, onChange, error }) {
       )}
 
       {(error || localError) && (
-        <p className="mt-3 text-sm font-medium text-critical" role="alert">
-          {localError || error}
-        </p>
+        <p className="mt-3 text-sm font-medium text-critical">{localError || error}</p>
       )}
 
-      {!value && (
+      {!imageSrc && (
         <div className="mt-5 flex gap-2 rounded-card border border-civic/15 bg-civic/[0.04] p-3 text-sm text-slate">
-          <Info className="mt-0.5 size-4 shrink-0 text-civic-600" aria-hidden />
+          <Info className="mt-0.5 size-4 shrink-0 text-civic-600" />
           <span>Stand safely, capture the whole issue, and make sure there's good lighting.</span>
         </div>
       )}
 
-      {/* Laptop/desktop viewfinder. */}
-      <CameraCapture
-        open={cameraOpen}
-        onClose={() => setCameraOpen(false)}
-        onCapture={(file) => {
-          setCameraOpen(false)
-          processFile(file)
-        }}
-        onPickFile={() => {
-          setCameraOpen(false)
-          openGallery()
-        }}
-      />
+      {!imageSrc && (
+        <Button type="button" variant="ghost" icon={ImagePlus} className="mt-4" onClick={() => galleryInputRef.current?.click()}>
+          Choose from gallery
+        </Button>
+      )}
     </div>
   )
 }

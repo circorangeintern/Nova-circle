@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { trackPageView } from '@/lib/analytics'
 import { Layout } from '@/components/layout/Layout'
 import { OfficialLayout } from '@/components/official/OfficialLayout'
 import { ProtectedRoute } from '@/components/official/ProtectedRoute'
@@ -40,6 +41,14 @@ const L = (el) => <Suspense fallback={<PageLoader />}>{el}</Suspense>
  * - Official app routes are gated by ProtectedRoute and use OfficialLayout.
  */
 export default function App() {
+  const location = useLocation()
+
+  // Fire a PostHog $pageview on every SPA route change (capture_pageview is
+  // disabled in PostHogProvider so this is the single source of truth).
+  useEffect(() => {
+    trackPageView(location.pathname + location.search)
+  }, [location.pathname, location.search])
+
   return (
     <Routes>
       {/* Public site */}

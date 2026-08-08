@@ -4,6 +4,7 @@ import { Search, ChevronRight, ChevronUp, MapPin } from 'lucide-react'
 import { StatusBadge, SeverityBadge } from '@/components/ui/Badge'
 import { CATEGORY_MAP, CORE_CATEGORIES, STATUSES, OFFICIAL_STATUS_FLOW } from '@/lib/constants'
 import { getReports } from '@/services/api'
+import { trackOfficialReportsViewed, trackFilterApplied, trackFilterCleared } from '@/lib/analytics'
 import { timeAgo } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -24,6 +25,7 @@ export default function OfficialReports() {
     getReports().then((data) => {
       setReports(data)
       setLoading(false)
+      trackOfficialReportsViewed({ total: data.length })
     })
   }, [])
 
@@ -45,6 +47,18 @@ export default function OfficialReports() {
     }
     return [...list].sort(sorters[sort])
   }, [reports, status, category, query, sort])
+
+  const handleStatusChange = (val) => {
+    setStatus(val)
+    if (val) trackFilterApplied('status', val, 'official_reports')
+    else trackFilterCleared('official_reports')
+  }
+
+  const handleCategoryChange = (val) => {
+    setCategory(val)
+    if (val) trackFilterApplied('category', val, 'official_reports')
+    else trackFilterCleared('official_reports')
+  }
 
   return (
     <div>
@@ -72,13 +86,13 @@ export default function OfficialReports() {
         <FilterGroup
           options={[{ key: null, label: 'All statuses' }, ...OFFICIAL_STATUS_FLOW.map((k) => ({ key: k, label: STATUSES[k].label }))]}
           value={status}
-          onChange={setStatus}
+          onChange={handleStatusChange}
         />
         <span className="mx-1 hidden h-6 w-px bg-line sm:block" />
         <FilterGroup
           options={[{ key: null, label: 'All types' }, ...CORE_CATEGORIES.map((c) => ({ key: c.key, label: c.shortLabel }))]}
           value={category}
-          onChange={setCategory}
+          onChange={handleCategoryChange}
         />
         <select
           value={sort}
