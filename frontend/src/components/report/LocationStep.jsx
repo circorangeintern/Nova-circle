@@ -210,14 +210,17 @@ export function LocationStep({ value, onChange, error }) {
           icon={LocateFixed}
           onClick={requestGps}
           className="absolute right-3 top-3 z-[500] bg-white/95 shadow-e2 backdrop-blur"
+          disabled={locating}
         >
-          Use GPS
+          {locating ? 'Requesting location…' : 'Use GPS'}
         </Button>
       </div>
 
       {gpsNotice && (
         <p role="status" aria-live="polite" className="mt-3 text-sm text-slate">
-          Allow location access in your browser prompt to use this device&apos;s GPS. You can still search or place the pin manually.
+          {locating
+            ? 'Your browser is asking for location access. Allow it to place your pin automatically.'
+            : 'Allow location access in your browser prompt to use this device\'s GPS. You can still search or place the pin manually.'}
         </p>
       )}
 

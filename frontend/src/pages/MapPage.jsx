@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, SlidersHorizontal, Camera, X } from 'lucide-react'
 import { ReportMap } from '@/components/map/ReportMap'
@@ -7,6 +7,12 @@ import { StatusBadge } from '@/components/ui/Badge'
 import { STATUSES, CATEGORIES } from '@/lib/constants'
 import { getReports } from '@/services/api'
 import { cn } from '@/lib/cn'
+import {
+  trackMapViewed,
+  trackFilterApplied,
+  trackFilterCleared,
+  trackMapSearchPerformed,
+} from '@/lib/analytics'
 
 /** Public interactive map (Master PRD §3.3 / PRD §5.3) — MVP slice. */
 export default function MapPage() {
@@ -14,8 +20,10 @@ export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState(null)
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [query, setQuery] = useState('')
+  const searchTimerRef = useRef(null)
 
   useEffect(() => {
+    trackMapViewed()
     getReports().then(setReports)
   }, [])
 
@@ -36,10 +44,35 @@ export default function MapPage() {
     })
   }, [reports, statusFilter, categoryFilter, query])
 
+  // Debounced search tracking — fires 600 ms after the user stops typing.
+  useEffect(() => {
+    if (!query) return
+    clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      trackMapSearchPerformed(query.length, filtered.length)
+    }, 600)
+    return () => clearTimeout(searchTimerRef.current)
+  }, [query, filtered.length])
+
+  const handleStatusFilter = (key) => {
+    const next = statusFilter === key ? null : key
+    setStatusFilter(next)
+    if (next) trackFilterApplied('status', next)
+    else trackFilterCleared()
+  }
+
+  const handleCategoryFilter = (key) => {
+    const next = categoryFilter === key ? null : key
+    setCategoryFilter(next)
+    if (next) trackFilterApplied('category', next)
+    else trackFilterCleared()
+  }
+
   const clearAll = () => {
     setStatusFilter(null)
     setCategoryFilter(null)
     setQuery('')
+    trackFilterCleared()
   }
   const hasFilters = statusFilter || categoryFilter || query
 
@@ -66,7 +99,7 @@ export default function MapPage() {
             {Object.values(STATUSES).map((s) => (
               <button
                 key={s.key}
-                onClick={() => setStatusFilter(statusFilter === s.key ? null : s.key)}
+                onClick={() => handleStatusFilter(s.key)}
                 className={cn(
                   'rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors',
                   statusFilter === s.key
@@ -87,7 +120,7 @@ export default function MapPage() {
             {CATEGORIES.slice(0, 6).map((c) => (
               <button
                 key={c.key}
-                onClick={() => setCategoryFilter(categoryFilter === c.key ? null : c.key)}
+                onClick={() => handleCategoryFilter(c.key)}
                 className={cn(
                   'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
                   categoryFilter === c.key
@@ -129,7 +162,7 @@ export default function MapPage() {
           {Object.values(STATUSES).map((s) => (
             <button
               key={s.key}
-              onClick={() => setStatusFilter(statusFilter === s.key ? null : s.key)}
+              onClick={() => handleStatusFilter(s.key)}
               className="shrink-0"
             >
               <StatusBadge status={s.key} className={cn(statusFilter === s.key && 'ring-2 ring-offset-1', 'ring-current')} />

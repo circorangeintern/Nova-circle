@@ -26,6 +26,15 @@ import { timeAgo } from '@/lib/format'
 import { getReportsByUser, deleteReport } from '@/services/api'
 import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 import { cn } from '@/lib/cn'
+import {
+  trackAccountViewed,
+  trackLogout,
+  trackProfileUpdated,
+  trackPasswordChanged,
+  trackAccountDeleted,
+  trackReportDeleted,
+  resetIdentity,
+} from '@/lib/analytics'
 
 export default function CitizenAccount() {
   const navigate = useNavigate()
@@ -37,6 +46,7 @@ export default function CitizenAccount() {
     if (user) getReportsByUser(user.id).then(setReports)
   }
   useEffect(load, [user])
+  useEffect(() => { trackAccountViewed() }, [])
 
   const stats = useMemo(() => {
     const list = reports ?? []
@@ -144,6 +154,7 @@ function MyReports({ reports, onChanged, userId }) {
     setDeleting(false)
     setToDelete(null)
     if (res.ok) {
+      trackReportDeleted(toDelete.id)
       toast.success('Report deleted.')
       onChanged()
     } else {
@@ -247,6 +258,7 @@ function Settings({ onLoggedOut }) {
 
   const saveProfile = () => {
     updateProfile({ name: name.trim(), prefs: { defaultAnonymous: anon } })
+    trackProfileUpdated()
     toast.success('Settings saved.')
   }
 
@@ -260,6 +272,7 @@ function Settings({ onLoggedOut }) {
     const res = await changePassword(pw)
     setPwSaving(false)
     if (res.ok) {
+      trackPasswordChanged()
       toast.success('Password updated.')
       setPw({ current: '', next: '' })
     } else {
@@ -269,6 +282,8 @@ function Settings({ onLoggedOut }) {
 
   const doLogout = () => {
     logout()
+    trackLogout('citizen')
+    resetIdentity()
     toast.success('Signed out.')
     onLoggedOut()
   }
@@ -276,6 +291,8 @@ function Settings({ onLoggedOut }) {
   const doDelete = async () => {
     setDeleting(true)
     await deleteAccount()
+    trackAccountDeleted()
+    resetIdentity()
     setDeleting(false)
     setConfirmDelete(false)
     toast.success('Your account has been deleted.')

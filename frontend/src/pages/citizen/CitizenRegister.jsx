@@ -11,6 +11,7 @@ import { AuthShell } from '@/components/auth/AuthShell'
 import { AuthField, authInputCls, PasswordStrengthMeter } from '@/components/auth/authUtils'
 import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 import { cn } from '@/lib/cn'
+import { identify, trackRegistrationSucceeded, trackRegistrationFailed } from '@/lib/analytics'
 
 const schema = z
   .object({
@@ -41,9 +42,13 @@ export default function CitizenRegister() {
     setFormError('')
     const res = await register(values)
     if (res.ok) {
+      const user = useCitizenAuthStore.getState().user
+      if (user) identify(user.id, { name: user.name, email: user.email, role: 'citizen' })
+      trackRegistrationSucceeded({ name: values.name })
       toast.success(`Welcome to PublicEye, ${values.name.split(' ')[0]}!`)
       navigate('/account', { replace: true })
     } else {
+      trackRegistrationFailed(res.error)
       setFormError(res.error)
     }
   }

@@ -1,4 +1,9 @@
-import posthog from "posthog-js";
+import {
+  trackReportFlowStarted,
+  trackReportStepCompleted,
+  trackReportStepValidationFailed,
+  trackReportSubmitted,
+} from '@/lib/analytics'
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -81,6 +86,9 @@ export default function ReportIssue() {
     if (!reportId) localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
   }, [form, reportId]);
 
+  // Fire report_flow_started once when the wizard mounts.
+  useEffect(() => { trackReportFlowStarted() }, [])
+
   const update = (partial) => setForm((f) => ({ ...f, ...partial }));
 
   const validateStep = (i) => {
@@ -94,12 +102,14 @@ export default function ReportIssue() {
     const map = {};
     for (const issue of result.error.issues) map[issue.path[0]] = issue.message;
     setErrors(map);
+    trackReportStepValidationFailed(i, Object.keys(map));
     return false;
   };
 
   const next = () => {
     if (step < 3 && !validateStep(step)) return;
     setErrors({});
+    trackReportStepCompleted(step);
     setStep((s) => Math.min(s + 1, 3));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -148,9 +158,11 @@ export default function ReportIssue() {
     });
 
     // 📊 PostHog event — fires only after successful submission
-    posthog.capture("report_submitted", {
+    trackReportSubmitted({
       category: form.category,
+      severity: form.severity,
       hasPhoto: !!form.photo,
+      isAnonymous: !citizen,
     });
 
     localStorage.removeItem(DRAFT_KEY);

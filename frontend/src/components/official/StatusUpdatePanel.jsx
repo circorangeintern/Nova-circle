@@ -1,4 +1,4 @@
-import posthog from "posthog-js";
+import { trackStatusChanged } from "@/lib/analytics";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Check, Lock } from "lucide-react";
@@ -42,10 +42,7 @@ export function StatusUpdatePanel({ report, onUpdated }) {
       toast.success(`Status updated to "${WORKFLOW_LABELS[selected]}".`);
 
       // 📊 PostHog event — fires only after a confirmed successful status update
-      posthog.capture("report_status_changed", {
-        oldStatus: report.status,
-        newStatus: selected,
-      });
+      trackStatusChanged(report.status, selected, { report_id: report.id });
 
       setNote("");
       onUpdated?.(updated);

@@ -11,6 +11,7 @@ import { AuthShell } from '@/components/auth/AuthShell'
 import { AuthField, authInputCls } from '@/components/auth/authUtils'
 import { useCitizenAuthStore } from '@/store/citizenAuthStore'
 import { cn } from '@/lib/cn'
+import { identify, trackCitizenLoginSucceeded, trackCitizenLoginFailed } from '@/lib/analytics'
 
 const schema = z.object({
   email: z.string().min(1, 'Enter your email.').email('Enter a valid email address.'),
@@ -34,9 +35,13 @@ export default function CitizenLogin() {
     setFormError('')
     const res = await login(values)
     if (res.ok) {
+      const user = useCitizenAuthStore.getState().user
+      if (user) identify(user.id, { name: user.name, email: user.email, role: 'citizen' })
+      trackCitizenLoginSucceeded()
       toast.success('Signed in.')
       navigate(location.state?.from ?? '/account', { replace: true })
     } else {
+      trackCitizenLoginFailed(res.error)
       setFormError(res.error)
     }
   }
